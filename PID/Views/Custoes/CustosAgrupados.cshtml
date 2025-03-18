@@ -1,0 +1,216 @@
+﻿@model IEnumerable<dynamic>
+
+<!-- Bootstrap CSS e JS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+    .nav-tabs .nav-link {
+        background-color: #e9ecef;
+        color: #495057;
+        transition: all 0.3s ease;
+        border-radius: 10px 10px 0 0;
+        transform: translateY(4px);
+    }
+
+        .nav-tabs .nav-link.active {
+            background-color: #0d6efd;
+            color: #fff;
+            transform: translateY(0);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+    .nav-tabs {
+        border-bottom: 2px solid #0d6efd;
+    }
+</style>
+
+<h2 class="text-center mb-4">Custos Agrupados</h2>
+
+<div class="container">
+    <ul class="nav nav-tabs nav-fill mb-4" id="myTab" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active fw-bold py-3" style="font-size:1.1rem;" id="graficos-tab" data-bs-toggle="tab" data-bs-target="#graficos" type="button">
+                📈 Gráficos
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link fw-bold py-3" style="font-size:1.1rem;" id="tabela-tab" data-bs-toggle="tab" data-bs-target="#tabela" type="button">
+                📋 Tabela
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- Aba Gráficos -->
+        <div class="tab-pane fade show active" id="graficos">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="text-center">Custos por Dispendio</h5>
+                    <canvas id="chartCustosDispendioBar"></canvas>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-center">Custos por Dispendio</h5>
+                    <canvas id="chartCustosDispendioPie"></canvas>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h5 class="text-center">Custos por Desenvolvimento</h5>
+                    <canvas id="chartCustosDesenvolvimentoBar"></canvas>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-center">Custos por Desenvolvimento</h5>
+                    <canvas id="chartCustosDesenvolvimentoPie"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba Tabela -->
+        <div class="tab-pane fade" id="tabela">
+            <table class="table table-hover">
+                <thead class="bg-primary text-white">
+                    <tr>
+                        <th>📌 Dispendio</th>
+                        <th>📈 Desenvolvimento</th>
+                        <th class="text-end">💰 Total</th>
+                        <th class="text-center">🔎 Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var grupo in Model)
+                    {
+                        <tr>
+                            <td>@grupo.Dispendio</td>
+                            <td>@grupo.Desenvolvimento</td>
+                            <td class="text-end"><strong>R$ @grupo.Total.ToString("N2")</strong></td>
+                            <td class="text-center">
+                                <button class="btn btn-info btn-sm" onclick="toggleDetalhes('@grupo.Dispendio', '@grupo.Desenvolvimento')">
+                                    📂 Detalhes
+                                </button>
+                            </td>
+                        </tr>
+                        <tr id="detalhes-@grupo.Dispendio-@grupo.Desenvolvimento" style="display:none; background-color:#f8f9fa;">
+                            <td colspan="4">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>📜 Descrição</th>
+                                            <th>💰 Valor</th>
+                                            <th>📅 Data</th>
+                                            <th>⚙️ Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var custo in grupo.CustosDetalhados)
+                                        {
+                                            <tr>
+                                                <td>@custo.Descricao</td>
+                                                <td><strong>R$ @custo.Valor.ToString("N2")</strong></td>
+                                                <td>@custo.Data.ToString("dd/MM/yyyy")</td>
+                                                <td>
+                                                    <a href="/Custoes/Edit/@custo.Id" class="btn btn-warning btn-sm">✏️</a>
+                                                    <a href="/Custoes/Details/@custo.Id" class="btn btn-primary btn-sm">🔍</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    function toggleDetalhes(dispendio, desenvolvimento) {
+        const detalhes = document.getElementById(`detalhes-${dispendio}-${desenvolvimento}`);
+        detalhes.style.display = detalhes.style.display === 'none' ? 'table-row' : 'none';
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var ctxDispendioBar = document.getElementById('chartCustosDispendioBar').getContext('2d');
+        var ctxDispendioPie = document.getElementById('chartCustosDispendioPie').getContext('2d');
+        var ctxDesenvolvimentoBar = document.getElementById('chartCustosDesenvolvimentoBar').getContext('2d');
+        var ctxDesenvolvimentoPie = document.getElementById('chartCustosDesenvolvimentoPie').getContext('2d');
+
+        var dispendios = @Html.Raw(Json.Serialize(Model.Select(g => g.Dispendio)));
+        var valoresDispendios = @Html.Raw(Json.Serialize(Model.Select(g => g.Total)));
+
+        var desenvolvimentos = @Html.Raw(Json.Serialize(Model.Select(g => g.Desenvolvimento)));
+        var valoresDesenvolvimentos = @Html.Raw(Json.Serialize(Model.Select(g => g.Total)));
+
+        // Gráfico de Barras por Dispendio
+        new Chart(ctxDispendioBar, {
+            type: 'bar',
+            data: {
+                labels: dispendios,
+                datasets: [{
+                    label: 'Total por Dispendio',
+                    data: valoresDispendios,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // Gráfico de Pizza por Dispendio
+        new Chart(ctxDispendioPie, {
+            type: 'pie',
+            data: {
+                labels: dispendios,
+                datasets: [{
+                    data: valoresDispendios,
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#9966FF']
+                }]
+            },
+            options: { responsive: true }
+        });
+
+        // Gráfico de Barras por Desenvolvimento
+        new Chart(ctxDesenvolvimentoBar, {
+            type: 'bar',
+            data: {
+                labels: desenvolvimentos,
+                datasets: [{
+                    label: 'Total por Desenvolvimento',
+                    data: valoresDesenvolvimentos,
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // Gráfico de Pizza por Desenvolvimento
+        new Chart(ctxDesenvolvimentoPie, {
+            type: 'pie',
+            data: {
+                labels: desenvolvimentos,
+                datasets: [{
+                    data: valoresDesenvolvimentos,
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#9966FF']
+                }]
+            },
+            options: { responsive: true }
+        });
+    });
+
+    function toggleDetalhes(dispendio, desenvolvimento) {
+        var row = document.getElementById(`detalhes-${dispendio}-${desenvolvimento}`);
+        row.style.display = row.style.display === "none" ? "table-row" : "none";
+    }
+</script>

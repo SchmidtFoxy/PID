@@ -25,6 +25,32 @@ namespace PID.Controllers
             return View(await custos.ToListAsync());
         }
 
+        // NOVA VIEW: Custos Agrupados
+        public async Task<IActionResult> CustosAgrupados()
+        {
+            var custos = await _context.Custos
+                .Include(c => c.Desenvolvimento)
+                .Include(c => c.Dispendio)
+                .ToListAsync();
+
+            var custosAgrupados = custos
+                .GroupBy(c => new { c.Dispendio.Descricao, c.Desenvolvimento.Classificacao })
+                .Select(g => new
+                {
+                    Dispendio = g.Key.Descricao,
+                    Desenvolvimento = g.Key.Classificacao,
+                    Total = g.Sum(c => c.Valor),
+                    CustosDetalhados = g.Select(c => new {
+                        c.Id,
+                        c.Descricao,
+                        c.Valor,
+                        c.Data
+                    }).ToList()
+                }).ToList();
+
+            return View(custosAgrupados);
+        }
+
         // GET: Custoes/Create
         public IActionResult Create()
         {
@@ -38,35 +64,9 @@ namespace PID.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,IdDispendio,Descricao,IdDesenvolvimento,Valor,Data")] Custo custo)
         {
-            Console.WriteLine("🔍 Iniciando criação de Custo...");
-
-            // Exibe os valores recebidos pelo POST
-            Console.WriteLine($"📥 IdDispendio recebido: {custo.IdDispendio}");
-            Console.WriteLine($"📥 IdDesenvolvimento recebido: {custo.IdDesenvolvimento}");
-            Console.WriteLine($"📥 Valor recebido: {custo.Valor}");
-            Console.WriteLine($"📥 Data recebida: {custo.Data}");
-
-            // Confere se os IDs existem no banco de dados
-            var desenvolvimento = await _context.Desenvolvimentos.FirstOrDefaultAsync(d => d.IdDesenvolvimento == custo.IdDesenvolvimento);
-            if (desenvolvimento == null)
-            {
-                ModelState.AddModelError("IdDesenvolvimento", "O Desenvolvimento selecionado não existe.");
-                Console.WriteLine("❌ Erro: Desenvolvimento não encontrado no banco!");
-            }
-
-            var dispendio = await _context.Dispendios.FirstOrDefaultAsync(d => d.IdDispendio == custo.IdDispendio);
-            if (dispendio == null)
-            {
-                ModelState.AddModelError("IdDispendio", "O Dispendio selecionado não existe.");
-                Console.WriteLine("❌ Erro: Dispendio não encontrado no banco!");
-            }
-
             if (!ModelState.IsValid)
             {
-                Console.WriteLine("❌ ModelState inválido!");
                 TempData["Erro"] = "Erro ao criar custo. Verifique os campos preenchidos.";
-                ViewData["IdDesenvolvimento"] = new SelectList(_context.Desenvolvimentos, "IdDesenvolvimento", "Classificacao", custo.IdDesenvolvimento);
-                ViewData["IdDispendio"] = new SelectList(_context.Dispendios, "IdDispendio", "Descricao", custo.IdDispendio);
                 return View(custo);
             }
 
@@ -74,17 +74,13 @@ namespace PID.Controllers
             {
                 _context.Add(custo);
                 await _context.SaveChangesAsync();
-                Console.WriteLine("✅ Custo criado com sucesso!");
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"🔥 Exceção ao salvar no banco: {ex.Message}");
                 TempData["Erro"] = "Erro ao salvar no banco. Verifique os logs.";
             }
 
-            ViewData["IdDesenvolvimento"] = new SelectList(_context.Desenvolvimentos, "IdDesenvolvimento", "Classificacao", custo.IdDesenvolvimento);
-            ViewData["IdDispendio"] = new SelectList(_context.Dispendios, "IdDispendio", "Descricao", custo.IdDispendio);
             return View(custo);
         }
 
@@ -134,7 +130,6 @@ namespace PID.Controllers
                 {
                     _context.Update(custo);
                     await _context.SaveChangesAsync();
-                    Console.WriteLine("✅ Custo atualizado com sucesso!");
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -146,8 +141,6 @@ namespace PID.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["IdDesenvolvimento"] = new SelectList(_context.Desenvolvimentos, "IdDesenvolvimento", "Classificacao", custo.IdDesenvolvimento);
-            ViewData["IdDispendio"] = new SelectList(_context.Dispendios, "IdDispendio", "Descricao", custo.IdDispendio);
             return View(custo);
         }
 
@@ -176,7 +169,6 @@ namespace PID.Controllers
             {
                 _context.Custos.Remove(custo);
                 await _context.SaveChangesAsync();
-                Console.WriteLine("✅ Custo excluído com sucesso!");
             }
             return RedirectToAction(nameof(Index));
         }
