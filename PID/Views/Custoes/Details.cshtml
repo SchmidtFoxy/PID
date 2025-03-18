@@ -1,0 +1,42 @@
+﻿@model PID.Models.Custo
+
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-md-12 text-center">
+            <h1 class="display-2 fw-bold">Detalhes do Custo</h1>
+            <p class="lead mt-3">Aqui você visualiza todas as informações detalhadas do custo selecionado.</p>
+        </div>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>@Html.DisplayNameFor(model => model.Dispendio):</strong> @Model.Dispendio.Descricao</p>
+                    <p><strong>@Html.DisplayNameFor(model => model.Descricao):</strong> @Model.Descricao</p>
+                    <p><strong>@Html.DisplayNameFor(model => model.Desenvolvimento):</strong> @Model.Desenvolvimento.Classificacao</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>@Html.DisplayNameFor(model => model.Valor):</strong> R$ @Model.Valor.ToString("N2")</p>
+                    <p><strong>@Html.DisplayNameFor(model => model.Data):</strong> @Model.Data.ToString("dd/MM/yyyy HH:mm")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary"><i class="fas fa-edit"></i> Editar</a>
+        <a asp-action="Index" class="btn btn-secondary ms-2"><i class="fas fa-arrow-left"></i> Voltar para Lista</a>
+    </div>
+</div>
+
+<style>
+    .card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 30px rgba(0,0,0,0.2);
+    }
+
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+</style>

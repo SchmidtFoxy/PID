@@ -1,0 +1,52 @@
+﻿<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-md-12 text-center">
+            <h1 class="display-2 fw-bold">Bem-vindo ao PID</h1>
+            <p class="lead mt-3">O PID (<strong>Projeto de Integração de Dados</strong>) da empresa <strong>Águia Sistemas</strong> foi desenvolvido para otimizar a gestão de projetos e gastos de forma eficiente e prática.</p>
+            <ul></ul>
+        </div>
+    </div>
+
+   
+
+    <div class="row justify-content-center gx-4">
+        <div class="col-md-4 d-flex align-items-stretch">
+            <div class="card shadow-lg border-0 rounded-4 mb-4">
+                <div class="card-body text-center">
+                    <div class="mb-3 fs-1 text-primary"><i class="fas fa-project-diagram"></i></div>
+                    <h4 class="card-title">Projetos P&D</h4>
+                    <p class="card-text">Gerencie e visualize seus projetos de desenvolvimento com total eficiência.</p>
+                    <a asp-controller="ProjetoPDs" asp-action="Index" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Ver Projetos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 d-flex align-items-stretch">
+            <div class="card shadow-lg border-0 rounded-4 mb-4">
+                <div class="card-body text-center">
+                    <div class="mb-3 fs-1 text-success"><i class="fas fa-balance-scale"></i></div>
+                    <h4 class="card-title fw-semibold">Lei do Bem</h4>
+                    <p class="card-text">Consulte rapidamente todos os projetos cadastrados relacionados à Lei do Bem.</p>
+                    <a asp-controller="LeiDoBem" asp-action="Index" class="btn btn-outline-success">
+                        <i class="fas fa-check"></i> Ver Projetos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 d-flex align-items-stretch">
+            <div class="card shadow-lg border-0 rounded-4 mb-4">
+                <div class="card-body text-center">
+                    <div class="mb-3 fs-1 text-warning"><i class="fas fa-coins"></i></div>
+                    <h4 class="card-title fw-semibold">Gastos</h4>
+                    <p class="card-text">Acompanhe detalhadamente as despesas envolvidas nos seus projetos.</p>
+                    <a asp-controller="Dispendios" asp-action="Index" class="btn btn-outline-warning">
+                        <i class="fas fa-chart-line"></i> Ver Gastos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

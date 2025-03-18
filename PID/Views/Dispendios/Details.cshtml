@@ -1,0 +1,39 @@
+﻿@model PID.Models.Dispendio
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-12 text-center">
+            <h1 class="display-2 fw-bold">Detalhes do Dispêndio</h1>
+            <p class="lead mt-3">Aqui você visualiza todas as informações detalhadas do dispêndio selecionado.</p>
+        </div>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-md-12">
+                    <p><strong>@Html.DisplayNameFor(model => model.Descricao):</strong> @Html.DisplayFor(model => model.Descricao)</p>
+                    <p><strong>@Html.DisplayNameFor(model => model.ProjetoFinep):</strong> @(Model.ProjetoFinep ? "✔ Sim" : "Não")</p>
+                    <p><strong>@Html.DisplayNameFor(model => model.ProjetoLeiBem):</strong> @(Model.ProjetoLeiBem ? "✔" : "✖")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a asp-action="Edit" asp-route-id="@Model?.IdDispendio" class="btn btn-primary"><i class="fas fa-edit"></i> Editar</a>
+        <a asp-action="Index" class="btn btn-secondary ms-2"><i class="fas fa-arrow-left"></i> Voltar para Lista</a>
+    </div>
+</div>
+
+<style>
+    .card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 30px rgba(0,0,0,0.2);
+    }
+
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+</style>
+

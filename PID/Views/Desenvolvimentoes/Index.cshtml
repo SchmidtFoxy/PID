@@ -1,0 +1,85 @@
+﻿@model IEnumerable<PID.Models.Desenvolvimento>
+
+<h1>Desenvolvimentos</h1>
+
+<!-- Barra de ferramentas -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="input-group w-50">
+        <input type="text" id="searchInput" class="form-control" placeholder="Procurar desenvolvimento...">
+        <button class="btn btn-outline-primary" type="button"><i class="fas fa-search"></i></button>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">+ Novo Desenvolvimento</a>
+</div>
+
+<!-- Tabela de Desenvolvimentos -->
+<table class="table table-striped table-hover shadow rounded">
+    <thead>
+        <tr>
+            <th>Ações</th>
+            <th>@Html.DisplayNameFor(model => model.Classificacao)</th>
+            <th>@Html.DisplayNameFor(model => model.Dificuldade)</th>
+            <th>@Html.DisplayNameFor(model => model.Produto)</th>
+            <th>@Html.DisplayNameFor(model => model.Descricao)</th>
+            <th>@Html.DisplayNameFor(model => model.ERP)</th>
+            <th>@Html.DisplayNameFor(model => model.DataInicio)</th>
+            <th>@Html.DisplayNameFor(model => model.DataFim)</th>
+            <th>@Html.DisplayNameFor(model => model.ProjetoFinep)</th>
+            <th>@Html.DisplayNameFor(model => model.ProjetoLeiBem)</th>
+            <th>@Html.DisplayNameFor(model => model.Custo)</th>
+            <th>@Html.DisplayNameFor(model => model.Fase)</th>
+            <th>@Html.DisplayNameFor(model => model.Status)</th>
+            <th>@Html.DisplayNameFor(model => model.TempoDesenvolvimento)</th>
+            <th>@Html.DisplayNameFor(model => model.Solicitante)</th>
+        </tr>
+    </thead>
+    <tbody id="desenvolvimentoTable">
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-cogs"></i> Ações
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-action="Edit" asp-route-id="@item.IdDesenvolvimento">Editar</a></li>
+                            <li><a class="dropdown-item" asp-action="Details" asp-route-id="@item.IdDesenvolvimento">Detalhes</a></li>
+                            <li>
+                                <form asp-action="Delete" asp-route-id="@item.IdDesenvolvimento" method="post" onsubmit="return confirm('Tem certeza que deseja excluir este desenvolvimento?');">
+                                    <button type="submit" class="dropdown-item text-danger">Excluir</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+                <td>@Html.DisplayFor(modelItem => item.Classificacao)</td>
+                <td>@Html.DisplayFor(modelItem => item.Dificuldade)</td>
+                <td>@Html.DisplayFor(modelItem => item.Produto)</td>
+                <td>@Html.DisplayFor(modelItem => item.Descricao)</td>
+                <td>@Html.DisplayFor(modelItem => item.ERP)</td>
+                <td>@item.DataInicio.ToShortDateString()</td>
+                <td>@item.DataFim.ToShortDateString()</td>
+                <td>@(item.ProjetoFinep ? "✔" : "")</td>
+                <td>@(item.ProjetoLeiBem ? "✔" : "")</td>
+                <td>@Html.DisplayFor(modelItem => item.Custo)</td>
+                <td>@Html.DisplayFor(modelItem => item.Fase)</td>
+                <td>@Html.DisplayFor(modelItem => item.Status)</td>
+                <td>@Html.DisplayFor(modelItem => item.TempoDesenvolvimento)</td>
+                <td>@Html.DisplayFor(modelItem => item.Solicitante)</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Script de Filtro da Tabela -->
+<script>
+    document.getElementById("searchInput").addEventListener("keyup", function () {
+        let filter = this.value.toLowerCase();
+        let rows = document.getElementById("desenvolvimentoTable").getElementsByTagName("tr");
+
+        for (let i = 0; i < rows.length; i++) {
+            let rowText = rows[i].innerText.toLowerCase();
+            rows[i].style.display = rowText.includes(filter) ? "" : "none";
+        }
+    });
+</script>

@@ -1,0 +1,124 @@
+/* Tamanho de fonte básico */
+html {
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+/* Foco em botões/inputs */
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+/* Cor de fundo do body */
+body {
+    margin: 0;
+    background-color: #f8f9fa;
+}
+
+
+
+
+
+
+
+/*           SIDEBAR (AdminLTE)         */
+
+
+/* Força a cor de fundo da sidebar (azul) */
+.main-sidebar {
+    background-color: #2a237c !important;
+    height: 100vh;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    overflow: hidden; 
+    padding-top: 20px;
+}
+
+
+
+/* Marca (brand) no topo da sidebar */
+.brand-link {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    color: #fff !important;
+    padding: 20px;
+    background-color: #2a237c; 
+    display: block;
+}
+
+.brand-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60px; 
+    padding: 10px;
+    overflow: hidden; 
+}
+
+.brand-image {
+    max-height: 40px; 
+    width: auto;
+    object-fit: contain; 
+}
+
+/* Remove a linha abaixo da logo na sidebar */
+.main-sidebar .brand-link {
+    border-bottom: none !important;
+}
+
+/* Links do menu lateral */
+.main-sidebar .nav-sidebar .nav-link {
+    font-size: 16px;
+    font-weight: 500;
+    color: #fff; /* Texto branco */
+    padding: 12px 15px;
+    border-radius: 5px;
+}
+
+/* Link ativo */
+.main-sidebar .nav-sidebar .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    color: #fff !important;
+}
+
+/* Hover nos links */
+.main-sidebar .nav-sidebar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
+/* Se quiser recuar subitens (submenu) */
+.nav-sidebar .nav-treeview > .nav-item > .nav-link {
+    padding-left: 2rem; /* Aumenta o recuo para submenus */
+}
+
+
+/* ÁREA DE CONTEÚDO (AdminLTE) */
+.content-wrapper {
+    margin-left: 250px; /* Espaço para a sidebar */
+    padding: 20px;
+    background-color: #f8f9fa;
+    min-height: 100vh; /* Ocupa a tela inteira */
+}
+
+/* RODAPÉ */
+.footer, .main-footer {
+    padding: 20px;
+    background-color: #fff;
+    border-top: 1px solid #ccc;
+    text-align: center;
+}

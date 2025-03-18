@@ -1,0 +1,67 @@
+﻿@model IEnumerable<PID.Models.Custo>
+
+<h1>Custos</h1>
+
+<!-- Barra de ferramentas -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="input-group w-50">
+        <input type="text" id="searchInput" class="form-control" placeholder="Procurar custo...">
+        <button class="btn btn-outline-primary" type="button"><i class="fas fa-search"></i></button>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">+ Novo Custo</a>
+</div>
+
+<!-- Tabela de Custos -->
+<table class="table table-striped table-hover shadow rounded">
+    <thead>
+        <tr>
+            <th>Ações</th>
+            <th>@Html.DisplayNameFor(model => model.Dispendio)</th>
+            <th>@Html.DisplayNameFor(model => model.Descricao)</th>
+            <th>@Html.DisplayNameFor(model => model.Desenvolvimento)</th>
+            <th>@Html.DisplayNameFor(model => model.Valor)</th>
+            <th>@Html.DisplayNameFor(model => model.Data)</th>
+        </tr>
+    </thead>
+    <tbody id="custoTable">
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-cogs"></i> Ações
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-action="Edit" asp-route-id="@item.Id">Editar</a></li>
+                            <li><a class="dropdown-item" asp-action="Details" asp-route-id="@item.Id">Detalhes</a></li>
+                            <li>
+                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Tem certeza que deseja excluir este custo?');">
+                                    <button type="submit" class="dropdown-item text-danger">Excluir</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+                <td>@Html.DisplayFor(modelItem => item.Dispendio.Descricao)</td>
+                <td>@Html.DisplayFor(modelItem => item.Descricao)</td>
+                <td>@Html.DisplayFor(modelItem => item.Desenvolvimento.Classificacao)</td>
+                <td>@item.Valor.ToString("C")</td> <!-- Exibe o valor formatado como moeda -->
+                <td>@item.Data.ToShortDateString()</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Script de Filtro da Tabela -->
+<script>
+    document.getElementById("searchInput").addEventListener("keyup", function () {
+        let filter = this.value.toLowerCase();
+        let rows = document.getElementById("custoTable").getElementsByTagName("tr");
+
+        for (let i = 0; i < rows.length; i++) {
+            let rowText = rows[i].innerText.toLowerCase();
+            rows[i].style.display = rowText.includes(filter) ? "" : "none";
+        }
+    });
+</script>

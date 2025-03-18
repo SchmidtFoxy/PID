@@ -1,0 +1,63 @@
+﻿@model IEnumerable<PID.Models.ProjetoPD>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Projetos - Lei do Bem</h1>
+    <a asp-controller="ProjetoPDs" asp-action="Create" class="btn btn-primary">+ Novo Projeto</a>
+</div>
+
+<div class="input-group mb-3">
+    <input type="text" class="form-control" placeholder="Procurar projeto..." id="searchInput">
+    <button class="btn btn-outline-secondary" type="button" onclick="searchProjects()">
+        <i class="fas fa-search"></i>
+    </button>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Ações</th>
+            <th>Ano</th>
+            <th>Desenvolvimento</th>
+            <th>Dispendio</th>
+            <th>Classificação</th>
+            <th>Estrutura</th>
+            <th>Descrição</th>
+            <th>Solicitante</th>
+            <th>Componente</th>
+            <th>Tipo de Produto</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-cogs"></i> Ações
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-controller="ProjetoPDs" asp-action="Details" asp-route-id="@item.Id">Detalhes</a></li>
+                            <li><a class="dropdown-item" asp-controller="ProjetoPDs" asp-action="Edit" asp-route-id="@item.Id">Editar</a></li>
+                            <li><a class="dropdown-item text-danger" asp-controller="ProjetoPDs" asp-action="Delete" asp-route-id="@item.Id">Excluir</a></li>
+                        </ul>
+                    </div>
+                </td>
+                <td>@item.Ano</td>
+                <td>@item.Desenvolvimento?.Classificacao</td>
+                <td>@item.Dispendio?.Descricao</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    function searchProjects() {
+        let input = document.getElementById("searchInput").value.toLowerCase();
+        let rows = document.querySelectorAll("tbody tr");
+
+        rows.forEach(row => {
+            row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none";
+        });
+    }
+</script>
