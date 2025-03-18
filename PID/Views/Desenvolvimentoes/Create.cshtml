@@ -77,6 +77,15 @@
                     <span asp-validation-for="Solicitante" class="text-danger"></span>
                 </div>
 
+                <div class="mb-3">
+                    <label asp-for="ProjetoPDId" class="form-label"></label>
+                    <select asp-for="ProjetoPDId" class="form-select" asp-items="ViewBag.ProjetoPDId">
+                        <option value="">Selecione um Projeto</option>
+                    </select>
+                    <span asp-validation-for="ProjetoPDId" class="text-danger"></span>
+                </div>
+
+
                 <div class="text-center">
                     <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Criar Desenvolvimento</button>
                     <a asp-action="Index" class="btn btn-secondary ms-2"><i class="fas fa-arrow-left"></i> Voltar para Lista</a>
@@ -102,4 +111,3 @@
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 </style>
-

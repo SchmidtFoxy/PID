@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PID.Data;
 using PID.Models;
@@ -22,7 +23,7 @@ namespace PID.Controllers
         public async Task<IActionResult> Index()
         {
             var desenvolvimentos = await _context.Desenvolvimentos
-                .Include(d => d.Custos) 
+                .Include(d => d.Custos)
                 .Select(d => new Desenvolvimento
                 {
                     IdDesenvolvimento = d.IdDesenvolvimento,
@@ -38,16 +39,12 @@ namespace PID.Controllers
                     Fase = d.Fase,
                     Status = d.Status,
                     Solicitante = d.Solicitante,
-                    Custo = d.Custos.Sum(c => c.Valor) 
+                    Custo = d.Custos.Sum(c => c.Valor)
                 })
                 .ToListAsync();
 
             return View(desenvolvimentos);
         }
-
-
-
-
 
         // GET: Desenvolvimentoes/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -56,33 +53,47 @@ namespace PID.Controllers
                 return NotFound();
 
             var desenvolvimento = await _context.Desenvolvimentos
-                .Include(d => d.Custos)
+                .Include(d => d.ProjetoPD) // Inclui o projeto vinculado
+                .Include(d => d.Custos) // Inclui os custos relacionados ao desenvolvimento
                 .FirstOrDefaultAsync(m => m.IdDesenvolvimento == id);
+
             if (desenvolvimento == null)
                 return NotFound();
 
             return View(desenvolvimento);
         }
 
+
         // GET: Desenvolvimentoes/Create
         public IActionResult Create()
         {
+            ViewData["ProjetoPDId"] = new SelectList(_context.ProjetosPD.Select(p => new
+            {
+                Id = p.Id,
+                Descricao = $"Projeto {p.Id} - Ano {p.Ano}"
+            }), "Id", "Descricao");
+
             return View();
         }
 
         // POST: Desenvolvimentoes/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdDesenvolvimento,Classificacao,Dificuldade,Produto,Descricao,ERP,DataInicio,DataFim,ProjetoFinep,ProjetoLeiBem,Status,Solicitante")] Desenvolvimento desenvolvimento)
+        public async Task<IActionResult> Create([Bind("IdDesenvolvimento,Classificacao,Dificuldade,Produto,Descricao,ERP,DataInicio,DataFim,ProjetoFinep,ProjetoLeiBem,Status,Solicitante,ProjetoPDId")] Desenvolvimento desenvolvimento)
         {
             if (ModelState.IsValid)
             {
-                desenvolvimento.Fase = "Inicial"; // ✅ Sempre inicia com "Inicial"
-
+                desenvolvimento.Fase = "Inicial";
                 _context.Add(desenvolvimento);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewData["ProjetoPDId"] = new SelectList(_context.ProjetosPD.Select(p => new
+            {
+                Id = p.Id,
+                Descricao = $"Projeto {p.Id} - Ano {p.Ano}"
+            }), "Id", "Descricao", desenvolvimento.ProjetoPDId);
 
             return View(desenvolvimento);
         }
@@ -99,13 +110,19 @@ namespace PID.Controllers
             if (desenvolvimento == null)
                 return NotFound();
 
+            ViewData["ProjetoPDId"] = new SelectList(_context.ProjetosPD.Select(p => new
+            {
+                Id = p.Id,
+                Descricao = $"Projeto {p.Id} - Ano {p.Ano}"
+            }), "Id", "Descricao", desenvolvimento.ProjetoPDId);
+
             return View(desenvolvimento);
         }
 
         // POST: Desenvolvimentoes/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdDesenvolvimento,Classificacao,Dificuldade,Produto,Descricao,ERP,DataInicio,DataFim,ProjetoFinep,ProjetoLeiBem,Status,Solicitante")] Desenvolvimento desenvolvimento)
+        public async Task<IActionResult> Edit(int id, [Bind("IdDesenvolvimento,Classificacao,Dificuldade,Produto,Descricao,ERP,DataInicio,DataFim,ProjetoFinep,ProjetoLeiBem,Status,Solicitante,ProjetoPDId")] Desenvolvimento desenvolvimento)
         {
             if (id != desenvolvimento.IdDesenvolvimento)
                 return NotFound();
@@ -116,8 +133,6 @@ namespace PID.Controllers
                 {
                     _context.Update(desenvolvimento);
                     await _context.SaveChangesAsync();
-
-                    // ✅ Atualiza o custo total do desenvolvimento após a edição
                     await AtualizarCustoTotal(desenvolvimento.IdDesenvolvimento);
                 }
                 catch (DbUpdateConcurrencyException)
@@ -131,40 +146,13 @@ namespace PID.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(desenvolvimento);
-        }
-
-        // GET: Desenvolvimentoes/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-                return NotFound();
-
-            var desenvolvimento = await _context.Desenvolvimentos
-                .Include(d => d.Custos)
-                .FirstOrDefaultAsync(m => m.IdDesenvolvimento == id);
-            if (desenvolvimento == null)
-                return NotFound();
-
-            return View(desenvolvimento);
-        }
-
-        // POST: Desenvolvimentoes/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var desenvolvimento = await _context.Desenvolvimentos
-                .Include(d => d.Custos)
-                .FirstOrDefaultAsync(d => d.IdDesenvolvimento == id);
-
-            if (desenvolvimento != null)
+            ViewData["ProjetoPDId"] = new SelectList(_context.ProjetosPD.Select(p => new
             {
-                _context.Desenvolvimentos.Remove(desenvolvimento);
-                await _context.SaveChangesAsync();
-            }
+                Id = p.Id,
+                Descricao = $"Projeto {p.Id} - Ano {p.Ano}"
+            }), "Id", "Descricao", desenvolvimento.ProjetoPDId);
 
-            return RedirectToAction(nameof(Index));
+            return View(desenvolvimento);
         }
 
         private bool DesenvolvimentoExists(int id)
@@ -172,12 +160,74 @@ namespace PID.Controllers
             return _context.Desenvolvimentos.Any(e => e.IdDesenvolvimento == id);
         }
 
-        // ✅ Método para atualizar o custo total do desenvolvimento
         private async Task AtualizarCustoTotal(int idDesenvolvimento)
         {
             var desenvolvimento = await _context.Desenvolvimentos
                 .Include(d => d.Custos)
                 .FirstOrDefaultAsync(d => d.IdDesenvolvimento == idDesenvolvimento);
         }
+
+
+
+        // GET: Desenvolvimentoes/LeiBem
+        public async Task<IActionResult> LeiBem()
+        {
+            var desenvolvimentosLeiBem = await _context.Desenvolvimentos
+                .Include(d => d.Custos)
+                .Where(d => d.ProjetoLeiBem) // Filtra apenas os registros com Lei do Bem = true
+                .Select(d => new Desenvolvimento
+                {
+                    IdDesenvolvimento = d.IdDesenvolvimento,
+                    Classificacao = d.Classificacao,
+                    Dificuldade = d.Dificuldade,
+                    Produto = d.Produto,
+                    Descricao = d.Descricao,
+                    ERP = d.ERP,
+                    DataInicio = d.DataInicio,
+                    DataFim = d.DataFim,
+                    ProjetoFinep = d.ProjetoFinep,
+                    // Omitir a coluna Lei do Bem (não é necessário incluí-la na model)
+                    Custo = d.Custos.Sum(c => c.Valor),
+                    Fase = d.Fase,
+                    Status = d.Status,
+                    Solicitante = d.Solicitante
+                })
+                .ToListAsync();
+
+            return View(desenvolvimentosLeiBem);
+        }
+
+        // GET: Desenvolvimentoes/Finep
+        public async Task<IActionResult> Finep()
+        {
+            var desenvolvimentosFinep = await _context.Desenvolvimentos
+                .Include(d => d.Custos)
+                .Where(d => d.ProjetoFinep) // Filtra apenas os registros com Finep = true
+                .Select(d => new Desenvolvimento
+                {
+                    IdDesenvolvimento = d.IdDesenvolvimento,
+                    Classificacao = d.Classificacao,
+                    Dificuldade = d.Dificuldade,
+                    Produto = d.Produto,
+                    Descricao = d.Descricao,
+                    ERP = d.ERP,
+                    DataInicio = d.DataInicio,
+                    DataFim = d.DataFim,
+                    ProjetoLeiBem = d.ProjetoLeiBem,
+                    // Omitir a coluna Finep (não é necessário incluí-la na model)
+                    Custo = d.Custos.Sum(c => c.Valor),
+                    Fase = d.Fase,
+                    Status = d.Status,
+                    Solicitante = d.Solicitante
+                })
+                .ToListAsync();
+
+            return View(desenvolvimentosFinep);
+        }
+
+
+
+
+
     }
 }

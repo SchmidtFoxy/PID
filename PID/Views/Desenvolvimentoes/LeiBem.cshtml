@@ -1,6 +1,6 @@
 ﻿@model IEnumerable<PID.Models.Desenvolvimento>
 
-<h1>Desenvolvimentos</h1>
+<h1>Lei do Bem</h1>
 
 <!-- Barra de ferramentas -->
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -24,8 +24,6 @@
             <th>@Html.DisplayNameFor(model => model.ERP)</th>
             <th>@Html.DisplayNameFor(model => model.DataInicio)</th>
             <th>@Html.DisplayNameFor(model => model.DataFim)</th>
-            <th>@Html.DisplayNameFor(model => model.ProjetoFinep)</th>
-            <th>@Html.DisplayNameFor(model => model.ProjetoLeiBem)</th>
             <th>@Html.DisplayNameFor(model => model.Custo)</th>
             <th>@Html.DisplayNameFor(model => model.Fase)</th>
             <th>@Html.DisplayNameFor(model => model.Status)</th>
@@ -61,8 +59,6 @@
                 <td>@Html.DisplayFor(modelItem => item.ERP)</td>
                 <td>@item.DataInicio.ToShortDateString()</td>
                 <td>@item.DataFim.ToShortDateString()</td>
-                <td>@(item.ProjetoFinep ? "✔" : "")</td>
-                <td>@(item.ProjetoLeiBem ? "✔" : "")</td>
                 <td>@Html.DisplayFor(modelItem => item.Custo)</td>
                 <td>@Html.DisplayFor(modelItem => item.Fase)</td>
                 <td>@Html.DisplayFor(modelItem => item.Status)</td>

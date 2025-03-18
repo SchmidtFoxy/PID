@@ -57,7 +57,7 @@ namespace PID.Migrations
 
                     b.HasIndex("IdDispendio");
 
-                    b.ToTable("Custos");
+                    b.ToTable("Custos", (string)null);
                 });
 
             modelBuilder.Entity("PID.Models.Desenvolvimento", b =>
@@ -116,7 +116,7 @@ namespace PID.Migrations
 
                     b.HasKey("IdDesenvolvimento");
 
-                    b.ToTable("Desenvolvimentos");
+                    b.ToTable("Desenvolvimentos", (string)null);
                 });
 
             modelBuilder.Entity("PID.Models.Dispendio", b =>
@@ -139,7 +139,7 @@ namespace PID.Migrations
 
                     b.HasKey("IdDispendio");
 
-                    b.ToTable("Dispendios");
+                    b.ToTable("Dispendios", (string)null);
                 });
 
             modelBuilder.Entity("PID.Models.Historico", b =>
@@ -172,7 +172,7 @@ namespace PID.Migrations
 
                     b.HasIndex("IdDesenvolvimento");
 
-                    b.ToTable("Historicos");
+                    b.ToTable("Historicos", (string)null);
                 });
 
             modelBuilder.Entity("PID.Models.ProjetoPD", b =>
@@ -204,7 +204,7 @@ namespace PID.Migrations
 
                     b.HasIndex("IdDispendio");
 
-                    b.ToTable("ProjetosPD");
+                    b.ToTable("ProjetosPD", (string)null);
                 });
 
             modelBuilder.Entity("PID.Models.Tarefa", b =>
@@ -237,7 +237,7 @@ namespace PID.Migrations
 
                     b.HasIndex("IdDesenvolvimento");
 
-                    b.ToTable("Tarefas");
+                    b.ToTable("Tarefas", (string)null);
                 });
 
             modelBuilder.Entity("PID.Models.Custo", b =>

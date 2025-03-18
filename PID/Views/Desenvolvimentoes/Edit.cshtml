@@ -77,11 +77,19 @@
                     <span asp-validation-for="Status" class="text-danger"></span>
                 </div>
 
-
                 <div class="mb-4">
                     <label asp-for="Solicitante" class="form-label"></label>
                     <input asp-for="Solicitante" class="form-control" />
                     <span asp-validation-for="Solicitante" class="text-danger"></span>
+                </div>
+
+                <!-- Campo de seleção para o Projeto -->
+                <div class="mb-3">
+                    <label asp-for="ProjetoPDId" class="form-label"></label>
+                    <select asp-for="ProjetoPDId" class="form-select" asp-items="ViewBag.ProjetoPDId">
+                        <option value="">Selecione um Projeto</option>
+                    </select>
+                    <span asp-validation-for="ProjetoPDId" class="text-danger"></span>
                 </div>
 
                 <div class="text-center">

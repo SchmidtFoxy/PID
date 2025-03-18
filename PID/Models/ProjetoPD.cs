@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PID.Models
@@ -11,19 +12,14 @@ namespace PID.Models
         [Required]
         public int Ano { get; set; }
 
-        // Chave estrangeira para Desenvolvimento
-        [Required]
-        public int IdDesenvolvimento { get; set; }
-        [ForeignKey("IdDesenvolvimento")]
-        public Desenvolvimento? Desenvolvimento { get; set; }
+        public bool ProjetoFinep { get; set; }
+        public bool ProjetoLeiBem { get; set; }
 
-        // Chave estrangeira para Dispendio
+        public ICollection<Desenvolvimento> Desenvolvimentos { get; set; } = new List<Desenvolvimento>();
+
         [Required]
         public int IdDispendio { get; set; }
         [ForeignKey("IdDispendio")]
         public Dispendio? Dispendio { get; set; }
-
-        public bool ProjetoFinep { get; set; }
-        public bool ProjetoLeiBem { get; set; }
     }
 }

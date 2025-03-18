@@ -16,9 +16,15 @@
         <div class="card-body p-4">
             <div class="row">
                 <div class="col-md-12">
-                    <p><strong>ID do Projeto:</strong> @Model.Id</p> <!-- Adicionado o ID do Projeto -->
+                    <p><strong>ID do Projeto:</strong> @Model.Id</p>
                     <p><strong>@Html.DisplayNameFor(model => model.Ano):</strong> @Model.Ano</p>
-                    <p><strong>@Html.DisplayNameFor(model => model.Desenvolvimento.Classificacao):</strong> @Model.Desenvolvimento.Classificacao</p>
+                    <p><strong>Desenvolvimentos:</strong></p>
+                    <ul>
+                        @foreach (var desenvolvimento in Model.Desenvolvimentos)
+                        {
+                            <li>@desenvolvimento.Classificacao - @desenvolvimento.Produto</li>
+                        }
+                    </ul>
                     <p><strong>@Html.DisplayNameFor(model => model.Dispendio.Descricao):</strong> @Model.Dispendio.Descricao</p>
                     <p><strong>@Html.DisplayNameFor(model => model.ProjetoFinep):</strong> @(Model.ProjetoFinep ? "✔️" : "❌")</p>
                     <p><strong>@Html.DisplayNameFor(model => model.ProjetoLeiBem):</strong> @(Model.ProjetoLeiBem ? "✔️" : "❌")</p>

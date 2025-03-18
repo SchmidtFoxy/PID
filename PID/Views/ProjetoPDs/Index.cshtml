@@ -5,7 +5,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div class="input-group w-50">
         <input type="text" id="searchInput" class="form-control" placeholder="Procurar projeto...">
-        <button class="btn btn-outline-primary" type="button"><i class="fas fa-search"></i></button>
+        <button class="btn btn-outline-primary"><i class="fas fa-search"></i></button>
     </div>
     <a asp-action="Create" class="btn btn-primary">+ Novo Projeto</a>
 </div>
@@ -13,54 +13,111 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>ID</th> <!-- Adicionando a coluna do ID -->
+            <th></th>
             <th>Ações</th>
-            <th>@Html.DisplayNameFor(model => model.Ano)</th>
-            <th>@Html.DisplayNameFor(model => model.Desenvolvimento)</th>
-            <th>@Html.DisplayNameFor(model => model.Dispendio)</th>
-            <th>@Html.DisplayNameFor(model => model.ProjetoFinep)</th>
-            <th>@Html.DisplayNameFor(model => model.ProjetoLeiBem)</th>
+            <th>ID</th>
+            <th>Ano</th>
+            <th>Dispendio</th>
+            <th>ProjetoFinep</th>
+            <th>ProjetoLeiBem</th>
         </tr>
     </thead>
     <tbody id="projectTable">
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.Id</td> <!-- Exibindo o ID do projeto -->
+                <td class="text-center align-middle" style="width:40px;">
+                    <button class="btn btn-sm btn-outline-secondary toggle-btn" type="button">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </td>
                 <td>
                     <div class="dropdown">
-                        <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown">
                             <i class="fas fa-cogs"></i> Ações
                         </button>
-                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <li><a class="dropdown-item" asp-action="Edit" asp-route-id="@item.Id">Editar</a></li>
+                        <ul class="dropdown-menu">
                             <li><a class="dropdown-item" asp-action="Details" asp-route-id="@item.Id">Detalhes</a></li>
-                            <li>
-                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Tem certeza que deseja excluir este projeto?');">
-                                    <button type="submit" class="dropdown-item text-danger">Excluir</button>
-                                </form>
-                            </li>
+                            <li><a class="dropdown-item" asp-action="Edit" asp-route-id="@item.Id">Editar</a></li>
+                            <li><a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@item.Id">Excluir</a></li>
                         </ul>
                     </div>
                 </td>
-                <td>@Html.DisplayFor(modelItem => item.Ano)</td>
-                <td>@Html.DisplayFor(modelItem => item.Desenvolvimento.Classificacao)</td>
-                <td>@Html.DisplayFor(modelItem => item.Dispendio.Descricao)</td>
+                <td>@item.Id</td>
+                <td>@item.Ano</td>
+                <td>@item.Dispendio?.Descricao</td>
                 <td>@(item.ProjetoFinep ? "✔" : "")</td>
                 <td>@(item.ProjetoLeiBem ? "✔" : "")</td>
+            </tr>
+
+            <tr class="details-row" style="display:none;">
+                <td colspan="7">
+                    <table class="table table-bordered bg-light">
+                        <thead>
+                            <tr class="text-center table-secondary">
+                                <th>Classificação</th>
+                                <th>Produto</th>
+                                <th>Descrição</th>
+                                <th>Data Inicio</th>
+                                <th>Data Fim</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var des in item.Desenvolvimentos)
+                            {
+                                <tr class="text-center">
+                                    <td>@des.Classificacao</td>
+                                    <td>@des.Produto</td>
+                                    <td>@des.Descricao</td>
+                                    <td>@des.DataInicio.ToShortDateString()</td>
+                                    <td>@(des.DataFim != DateTime.MinValue ? des.DataFim.ToShortDateString() : "Em andamento")</td>
+                                    <td>
+                                        <a class="btn btn-sm btn-warning" asp-controller="Desenvolvimentoes" asp-action="Edit" asp-route-id="@des.IdDesenvolvimento"><i class="fas fa-pencil-alt"></i></a>
+                                        <a class="btn btn-sm btn-info" asp-controller="Desenvolvimentoes" asp-action="Details" asp-route-id="@des.IdDesenvolvimento"><i class="fas fa-search"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </td>
             </tr>
         }
     </tbody>
 </table>
 
 <script>
+    document.querySelectorAll(".toggle-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            let icon = btn.querySelector("i");
+            let detailsRow = btn.closest("tr").nextElementSibling;
+
+            if (detailsRow.style.display === "none") {
+                detailsRow.style.display = "";
+                icon.classList.remove("fa-chevron-down");
+                icon.classList.add("fa-chevron-up");
+            } else {
+                detailsRow.style.display = "none";
+                icon.classList.remove("fa-chevron-up");
+                icon.classList.add("fa-chevron-down");
+            }
+        });
+    });
+
     document.getElementById("searchInput").addEventListener("keyup", function () {
         let filter = this.value.toLowerCase();
-        let rows = document.getElementById("projectTable").getElementsByTagName("tr");
+        let rows = document.querySelectorAll("#projectTable > tr:not(.details-row)");
 
-        for (let i = 0; i < rows.length; i++) {
-            let rowText = rows[i].innerText.toLowerCase();
-            rows[i].style.display = rowText.includes(filter) ? "" : "none";
-        }
+        rows.forEach(mainRow => {
+            let detailsRow = mainRow.nextElementSibling;
+            let combinedText = (mainRow.innerText + detailsRow.innerText).toLowerCase();
+            let display = combinedText.includes(filter) ? "" : "none";
+            mainRow.style.display = display;
+            detailsRow.style.display = "none";
+
+            let icon = mainRow.querySelector(".toggle-btn i");
+            icon.classList.remove("fa-chevron-up");
+            icon.classList.add("fa-chevron-down");
+        });
     });
 </script>

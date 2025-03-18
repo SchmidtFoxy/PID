@@ -24,14 +24,14 @@ namespace PID.Data
             // Configuração de precisão para o campo Valor na tabela Custo
             modelBuilder.Entity<Custo>()
                 .Property(c => c.Valor)
-                .HasColumnType("decimal(18,2)"); // Garante que o campo decimal não sofra truncamento
+                .HasColumnType("decimal(18,2)");
 
-            // Configuração de relacionamento entre ProjetoPD e Desenvolvimento
+            // Relacionamento um-para-muitos entre ProjetoPD e Desenvolvimento
             modelBuilder.Entity<ProjetoPD>()
-                .HasOne(p => p.Desenvolvimento)
-                .WithMany()
-                .HasForeignKey(p => p.IdDesenvolvimento)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasMany(p => p.Desenvolvimentos)
+                .WithOne(d => d.ProjetoPD)
+                .HasForeignKey(d => d.ProjetoPDId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Configuração de relacionamento entre ProjetoPD e Dispendio
             modelBuilder.Entity<ProjetoPD>()
@@ -50,7 +50,7 @@ namespace PID.Data
             // Configuração de relacionamento entre Custo e Desenvolvimento
             modelBuilder.Entity<Custo>()
                 .HasOne(c => c.Desenvolvimento)
-                .WithMany()
+                .WithMany(d => d.Custos)
                 .HasForeignKey(c => c.IdDesenvolvimento)
                 .OnDelete(DeleteBehavior.Restrict);
 

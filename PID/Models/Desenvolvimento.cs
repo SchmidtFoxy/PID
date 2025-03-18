@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 
 namespace PID.Models
 {
@@ -34,14 +33,13 @@ namespace PID.Models
         public bool ProjetoLeiBem { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        public decimal Custo { get; set; } = 0;  // Agora nunca será nulo
+        public decimal Custo { get; set; } = 0;
 
         public string Fase { get; set; } = "Inicial";
         public string Status { get; set; } = "Novo";
 
         public string Solicitante { get; set; } = string.Empty;
 
-        // 🔄 ✅ Agora `TempoDesenvolvimento` é calculado automaticamente!
         public string TempoDesenvolvimento
         {
             get
@@ -52,8 +50,13 @@ namespace PID.Models
             }
         }
 
-        // Relacionamento com a tabela de Custos
         public ICollection<Custo> Custos { get; set; } = new List<Custo>();
-    }
 
+        [Required(ErrorMessage = "Selecione um projeto.")]
+        public int ProjetoPDId { get; set; }
+
+        [ForeignKey("ProjetoPDId")]
+        public ProjetoPD? ProjetoPD { get; set; }
+
+    }
 }

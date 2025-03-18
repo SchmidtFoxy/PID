@@ -17,7 +17,7 @@
         <tr>
             <th>Ações</th>
             <th>Ano</th>
-            <th>Desenvolvimento</th>
+            <th>Desenvolvimentos</th>
             <th>Dispendio</th>
         </tr>
     </thead>
@@ -38,7 +38,14 @@
                     </div>
                 </td>
                 <td>@item.Ano</td>
-                <td>@item.Desenvolvimento?.Classificacao</td>
+                <td>
+                    <ul>
+                        @foreach (var desenvolvimento in item.Desenvolvimentos)
+                        {
+                            <li>@desenvolvimento.Classificacao - @desenvolvimento.Produto</li>
+                        }
+                    </ul>
+                </td>
                 <td>@item.Dispendio?.Descricao</td>
             </tr>
         }

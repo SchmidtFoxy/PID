@@ -21,12 +21,12 @@ namespace PID.Controllers
         // GET: ProjetoPDs
         public async Task<IActionResult> Index()
         {
-            var projetos = _context.ProjetosPD
-                .Include(p => p.Desenvolvimento)
+            var projetos = await _context.ProjetosPD
+                .Include(p => p.Desenvolvimentos)
                 .Include(p => p.Dispendio)
                 .ToListAsync();
 
-            return View(await projetos);
+            return View(projetos);
         }
 
         // GET: ProjetoPDs/Details/5
@@ -36,7 +36,7 @@ namespace PID.Controllers
                 return NotFound();
 
             var projetoPD = await _context.ProjetosPD
-                .Include(p => p.Desenvolvimento)
+                .Include(p => p.Desenvolvimentos)
                 .Include(p => p.Dispendio)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
@@ -49,7 +49,6 @@ namespace PID.Controllers
         // GET: ProjetoPDs/Create
         public IActionResult Create()
         {
-            ViewData["IdDesenvolvimento"] = new SelectList(_context.Desenvolvimentos, "IdDesenvolvimento", "Classificacao");
             ViewData["IdDispendio"] = new SelectList(_context.Dispendios, "IdDispendio", "Descricao");
             return View();
         }
@@ -57,21 +56,13 @@ namespace PID.Controllers
         // POST: ProjetoPDs/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Ano,IdDesenvolvimento,IdDispendio,ProjetoFinep,ProjetoLeiBem,Classificacao,Estrutura,Descricao,Solicitante,Componente,TipoProduto")] ProjetoPD projetoPD)
+        public async Task<IActionResult> Create([Bind("Id,Ano,IdDispendio,ProjetoFinep,ProjetoLeiBem")] ProjetoPD projetoPD)
         {
-            if (!_context.Desenvolvimentos.Any(d => d.IdDesenvolvimento == projetoPD.IdDesenvolvimento))
-                ModelState.AddModelError("IdDesenvolvimento", "Desenvolvimento selecionado não existe.");
-
             if (!_context.Dispendios.Any(d => d.IdDispendio == projetoPD.IdDispendio))
                 ModelState.AddModelError("IdDispendio", "Dispendio selecionado não existe.");
 
             if (!ModelState.IsValid)
             {
-                var erros = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                Console.WriteLine("ERROS NO MODELSTATE DETECTADOS:");
-                erros.ForEach(erro => Console.WriteLine($"- {erro}"));
-
-                ViewData["IdDesenvolvimento"] = new SelectList(_context.Desenvolvimentos, "IdDesenvolvimento", "Classificacao", projetoPD.IdDesenvolvimento);
                 ViewData["IdDispendio"] = new SelectList(_context.Dispendios, "IdDispendio", "Descricao", projetoPD.IdDispendio);
                 return View(projetoPD);
             }
@@ -91,7 +82,6 @@ namespace PID.Controllers
             if (projetoPD == null)
                 return NotFound();
 
-            ViewData["IdDesenvolvimento"] = new SelectList(_context.Desenvolvimentos, "IdDesenvolvimento", "Classificacao", projetoPD.IdDesenvolvimento);
             ViewData["IdDispendio"] = new SelectList(_context.Dispendios, "IdDispendio", "Descricao", projetoPD.IdDispendio);
             return View(projetoPD);
         }
@@ -99,24 +89,16 @@ namespace PID.Controllers
         // POST: ProjetoPDs/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Ano,IdDesenvolvimento,IdDispendio,ProjetoFinep,ProjetoLeiBem,Classificacao,Estrutura,Descricao,Solicitante,Componente,TipoProduto")] ProjetoPD projetoPD)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Ano,IdDispendio,ProjetoFinep,ProjetoLeiBem")] ProjetoPD projetoPD)
         {
             if (id != projetoPD.Id)
                 return NotFound();
-
-            if (!_context.Desenvolvimentos.Any(d => d.IdDesenvolvimento == projetoPD.IdDesenvolvimento))
-                ModelState.AddModelError("IdDesenvolvimento", "Desenvolvimento selecionado não existe.");
 
             if (!_context.Dispendios.Any(d => d.IdDispendio == projetoPD.IdDispendio))
                 ModelState.AddModelError("IdDispendio", "Dispendio selecionado não existe.");
 
             if (!ModelState.IsValid)
             {
-                var erros = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                Console.WriteLine("ERROS NO MODELSTATE DETECTADOS:");
-                erros.ForEach(erro => Console.WriteLine($"- {erro}"));
-
-                ViewData["IdDesenvolvimento"] = new SelectList(_context.Desenvolvimentos, "IdDesenvolvimento", "Classificacao", projetoPD.IdDesenvolvimento);
                 ViewData["IdDispendio"] = new SelectList(_context.Dispendios, "IdDispendio", "Descricao", projetoPD.IdDispendio);
                 return View(projetoPD);
             }
@@ -143,7 +125,7 @@ namespace PID.Controllers
                 return NotFound();
 
             var projetoPD = await _context.ProjetosPD
-                .Include(p => p.Desenvolvimento)
+                .Include(p => p.Desenvolvimentos)
                 .Include(p => p.Dispendio)
                 .FirstOrDefaultAsync(m => m.Id == id);
 

@@ -19,9 +19,9 @@ namespace PID.Controllers
         public async Task<IActionResult> Index()
         {
             var projetosLeiBem = await _context.ProjetosPD
-                .Include(p => p.Desenvolvimento)
+                .Include(p => p.Desenvolvimentos)
                 .Include(p => p.Dispendio)
-                .Where(p => p.ProjetoLeiBem == true)
+                .Where(p => p.ProjetoLeiBem)
                 .ToListAsync();
 
             return View(projetosLeiBem);
