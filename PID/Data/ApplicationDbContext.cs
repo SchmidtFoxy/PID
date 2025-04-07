@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PID.Models;
 
 namespace PID.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<Usuario>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -31,7 +32,7 @@ namespace PID.Data
                 .HasMany(p => p.Desenvolvimentos)
                 .WithOne(d => d.ProjetoPD)
                 .HasForeignKey(d => d.ProjetoPDId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Configuração de relacionamento entre ProjetoPD e Dispendio
             modelBuilder.Entity<ProjetoPD>()
@@ -59,14 +60,14 @@ namespace PID.Data
                 .HasOne(t => t.Desenvolvimento)
                 .WithMany()
                 .HasForeignKey(t => t.IdDesenvolvimento)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Configuração de relacionamento entre Histórico e Desenvolvimento
             modelBuilder.Entity<Historico>()
                 .HasOne(h => h.Desenvolvimento)
                 .WithMany()
                 .HasForeignKey(h => h.IdDesenvolvimento)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
