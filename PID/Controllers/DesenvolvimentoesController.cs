@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PID.Data;
 using PID.Models;
+using PdfSharpCore.Drawing;
+using PdfSharpCore.Pdf;
 
 namespace PID.Controllers
 {
@@ -283,6 +287,131 @@ namespace PID.Controllers
         }
 
 
+        public async Task<IActionResult> ExportarHistoricoExcel(int id)
+        {
+            var desenvolvimento = await _context.Desenvolvimentos
+                .Include(d => d.Custos)
+                .Include(d => d.Comentarios).ThenInclude(c => c.Usuario)
+                .Include(d => d.HistoricoEdicoes).ThenInclude(h => h.Usuario)
+                .FirstOrDefaultAsync(d => d.IdDesenvolvimento == id);
 
+            if (desenvolvimento == null) return NotFound();
+
+            using var workbook = new XLWorkbook();
+            var ws = workbook.Worksheets.Add("Relatório");
+
+            int row = 1;
+            ws.Cell(row++, 1).Value = "Relatório de Desenvolvimento";
+            ws.Cell(row++, 1).Value = "Informações Gerais";
+            ws.Cell(row++, 1).Value = "Produto";
+            ws.Cell(row - 1, 2).Value = desenvolvimento.Produto;
+            ws.Cell(row++, 1).Value = "Descrição";
+            ws.Cell(row - 1, 2).Value = desenvolvimento.Descricao;
+            ws.Cell(row++, 1).Value = "Solicitante";
+            ws.Cell(row - 1, 2).Value = desenvolvimento.Solicitante;
+            ws.Cell(row++, 1).Value = "Classificação";
+            ws.Cell(row - 1, 2).Value = desenvolvimento.Classificacao;
+            ws.Cell(row++, 1).Value = "Dificuldade";
+            ws.Cell(row - 1, 2).Value = desenvolvimento.Dificuldade;
+            ws.Cell(row++, 1).Value = "Status";
+            ws.Cell(row - 1, 2).Value = desenvolvimento.Status;
+            ws.Cell(row++, 1).Value = "Data de Início";
+            ws.Cell(row - 1, 2).Value = desenvolvimento.DataInicio.ToShortDateString();
+            ws.Cell(row++, 1).Value = "Data de Fim";
+            ws.Cell(row - 1, 2).Value = desenvolvimento.DataFim.ToShortDateString();
+            ws.Cell(row++, 1).Value = "Custo Total";
+            ws.Cell(row - 1, 2).Value = desenvolvimento.Custos.Sum(c => c.Valor).ToString("C2");
+
+            row++;
+            ws.Cell(row++, 1).Value = "Comentários Recentes";
+            foreach (var c in desenvolvimento.Comentarios.OrderByDescending(c => c.DataCriacao).Take(3))
+            {
+                ws.Cell(row++, 1).Value = $"- {c.Texto} ({c.Usuario?.NomeCompleto})";
+            }
+
+            row++;
+            ws.Cell(row++, 1).Value = "Histórico de Edições";
+            foreach (var h in desenvolvimento.HistoricoEdicoes.OrderBy(h => h.DataAlteracao))
+            {
+                ws.Cell(row++, 1).Value = $"- {h.DataAlteracao:dd/MM/yyyy} - {h.CampoAlterado}: '{h.ValorAnterior}' → '{h.ValorAtual}' por {h.Usuario?.NomeCompleto}";
+            }
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            stream.Position = 0;
+
+            return File(stream.ToArray(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"Relatorio_Desenvolvimento_{desenvolvimento.IdDesenvolvimento}.xlsx");
+        }
+
+
+        public async Task<IActionResult> ExportarHistoricoPdf(int id)
+        {
+            var desenvolvimento = await _context.Desenvolvimentos
+                .Include(d => d.Custos)
+                .Include(d => d.Comentarios).ThenInclude(c => c.Usuario)
+                .Include(d => d.HistoricoEdicoes).ThenInclude(h => h.Usuario)
+                .FirstOrDefaultAsync(d => d.IdDesenvolvimento == id);
+
+            if (desenvolvimento == null)
+                return NotFound();
+
+            var document = new PdfDocument();
+            var page = document.AddPage();
+            var gfx = XGraphics.FromPdfPage(page);
+            var fontTitle = new XFont("Arial", 16, XFontStyle.Bold);
+            var fontSection = new XFont("Arial", 12, XFontStyle.Bold);
+            var fontText = new XFont("Arial", 10);
+
+            int y = 40;
+            gfx.DrawString("Relatório de Desenvolvimento", fontTitle, XBrushes.Black, new XRect(0, y, page.Width, 20), XStringFormats.TopCenter);
+            y += 40;
+
+            gfx.DrawString("Informações Gerais", fontSection, XBrushes.Black, new XPoint(40, y));
+            y += 25;
+
+            void DrawField(string label, string value)
+            {
+                gfx.DrawString(label + ":", fontText, XBrushes.Black, new XPoint(50, y));
+                gfx.DrawString(value, fontText, XBrushes.Black, new XPoint(150, y));
+                y += 20;
+            }
+
+            DrawField("Produto", desenvolvimento.Produto);
+            DrawField("Descrição", desenvolvimento.Descricao);
+            DrawField("Solicitante", desenvolvimento.Solicitante);
+            DrawField("Classificação", desenvolvimento.Classificacao);
+            DrawField("Dificuldade", desenvolvimento.Dificuldade);
+            DrawField("Status", desenvolvimento.Status);
+            DrawField("Data de Início", desenvolvimento.DataInicio.ToShortDateString());
+            DrawField("Data de Fim", desenvolvimento.DataFim.ToShortDateString());
+            DrawField("Custo Total", desenvolvimento.Custos.Sum(c => c.Valor).ToString("C2"));
+
+            y += 20;
+            gfx.DrawString("Comentários Recentes", fontSection, XBrushes.Black, new XPoint(40, y));
+            y += 25;
+            foreach (var c in desenvolvimento.Comentarios.OrderByDescending(c => c.DataCriacao).Take(3))
+            {
+                gfx.DrawString("- " + c.Texto + " (" + c.Usuario?.NomeCompleto + ")", fontText, XBrushes.Black, new XPoint(50, y));
+                y += 20;
+            }
+
+            y += 20;
+            gfx.DrawString("Histórico de Edições", fontSection, XBrushes.Black, new XPoint(40, y));
+            y += 25;
+            foreach (var h in desenvolvimento.HistoricoEdicoes.OrderBy(h => h.DataAlteracao))
+            {
+                var linha = $"- {h.DataAlteracao:dd/MM/yyyy} - {h.CampoAlterado}: '{h.ValorAnterior}' → '{h.ValorAtual}' por {h.Usuario?.NomeCompleto}";
+                gfx.DrawString(linha, fontText, XBrushes.Black, new XPoint(50, y));
+                y += 20;
+            }
+
+            using var stream = new MemoryStream();
+            document.Save(stream, false);
+            stream.Position = 0;
+
+            return File(stream.ToArray(), "application/pdf", $"Relatorio_Desenvolvimento_{id}.pdf");
+        }
     }
 }

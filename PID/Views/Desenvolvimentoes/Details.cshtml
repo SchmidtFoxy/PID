@@ -128,6 +128,27 @@
             {
                 <p class="text-muted">Nenhum custo registrado para este desenvolvimento.</p>
             }
+
+
+            <hr class="my-4" />
+            <h4>Exportar Relatório</h4>
+            <div class="d-flex flex-wrap gap-3 mb-4">
+                <a asp-action="ExportarHistoricoExcel"
+                   asp-route-id="@Model.IdDesenvolvimento"
+                   class="btn btn-outline-success d-flex align-items-center">
+                    <i class="fas fa-file-excel me-2"></i> Exportar para Excel
+                </a>
+
+                <a asp-action="ExportarHistoricoPdf"
+                   asp-route-id="@Model.IdDesenvolvimento"
+                   class="btn btn-outline-danger d-flex align-items-center">
+                    <i class="fas fa-file-pdf me-2"></i> Exportar para PDF
+                </a>
+            </div>
+
+
+
+
         </div>
     </div>
 
@@ -166,6 +187,7 @@
         </div>
         <button type="submit" class="btn btn-primary">Enviar</button>
     </form>
+
 
 
 

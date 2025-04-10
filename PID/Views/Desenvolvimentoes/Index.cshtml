@@ -17,10 +17,10 @@
         <tr>
             <th>Ações</th>
             <th>ID</th>
+            <th>@Html.DisplayNameFor(model => model.Descricao)</th>
             <th>@Html.DisplayNameFor(model => model.Classificacao)</th>
             <th>@Html.DisplayNameFor(model => model.Dificuldade)</th>
             <th>@Html.DisplayNameFor(model => model.Produto)</th>
-            <th>@Html.DisplayNameFor(model => model.Descricao)</th>
             <th>@Html.DisplayNameFor(model => model.ERP)</th>
             <th>@Html.DisplayNameFor(model => model.DataInicio)</th>
             <th>@Html.DisplayNameFor(model => model.DataFim)</th>
@@ -54,10 +54,10 @@
                     </div>
                 </td>
                 <td>@item.IdDesenvolvimento</td>
+                <td>@Html.DisplayFor(modelItem => item.Descricao)</td>
                 <td>@Html.DisplayFor(modelItem => item.Classificacao)</td>
                 <td>@Html.DisplayFor(modelItem => item.Dificuldade)</td>
                 <td>@Html.DisplayFor(modelItem => item.Produto)</td>
-                <td>@Html.DisplayFor(modelItem => item.Descricao)</td>
                 <td>@Html.DisplayFor(modelItem => item.ERP)</td>
                 <td>@item.DataInicio.ToShortDateString()</td>
                 <td>@item.DataFim.ToShortDateString()</td>
