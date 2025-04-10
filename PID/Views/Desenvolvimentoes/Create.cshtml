@@ -15,6 +15,13 @@
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <div class="mb-3">
+                    <label asp-for="Descricao" class="form-label"></label>
+                    <textarea asp-for="Descricao" class="form-control"></textarea>
+                    <span asp-validation-for="Descricao" class="text-danger"></span>
+                </div>
+
+
+                <div class="mb-3">
                     <label asp-for="Classificacao" class="form-label"></label>
                     <input asp-for="Classificacao" class="form-control" />
                     <span asp-validation-for="Classificacao" class="text-danger"></span>
@@ -30,12 +37,6 @@
                     <label asp-for="Produto" class="form-label"></label>
                     <input asp-for="Produto" class="form-control" />
                     <span asp-validation-for="Produto" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Descricao" class="form-label"></label>
-                    <textarea asp-for="Descricao" class="form-control"></textarea>
-                    <span asp-validation-for="Descricao" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
