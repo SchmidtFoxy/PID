@@ -59,8 +59,9 @@ namespace PID.Models
         public ProjetoPD? ProjetoPD { get; set; }
 
         // Adicionando os relacionamentos com Comentarios e HistoricoEdicoes
-        public ICollection<Comentario> Comentarios { get; set; }
-        public ICollection<HistoricoEdicaoDesenvolvimento> HistoricoEdicoes { get; set; }
+        public ICollection<Comentario> Comentarios { get; set; } = new List<Comentario>();
+        public ICollection<HistoricoEdicaoDesenvolvimento> HistoricoEdicoes { get; set; } = new List<HistoricoEdicaoDesenvolvimento>();
+
 
     }
 }

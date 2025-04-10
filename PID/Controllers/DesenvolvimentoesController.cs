@@ -95,7 +95,18 @@ namespace PID.Controllers
                 Descricao = $"Projeto {p.Id} - Ano {p.Ano}"
             }), "Id", "Descricao", desenvolvimento.ProjetoPDId);
 
+            foreach (var modelError in ModelState)
+            {
+                foreach (var error in modelError.Value.Errors)
+                {
+                    Console.WriteLine($"Erro em {modelError.Key}: {error.ErrorMessage}");
+                }
+            }
+
+
+            ViewBag.ModelStateErros = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
             return View(desenvolvimento);
+
         }
 
         public async Task<IActionResult> Edit(int? id)

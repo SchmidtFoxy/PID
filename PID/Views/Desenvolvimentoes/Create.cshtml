@@ -92,6 +92,21 @@
                     <a asp-action="Index" class="btn btn-secondary ms-2"><i class="fas fa-arrow-left"></i> Voltar para Lista</a>
                 </div>
             </form>
+
+
+            @if (ViewBag.ModelStateErros != null && ((List<string>)ViewBag.ModelStateErros).Any())
+            {
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach (var erro in (List<string>)ViewBag.ModelStateErros)
+                        {
+                            <li>@erro</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+
         </div>
     </div>
 </div>
