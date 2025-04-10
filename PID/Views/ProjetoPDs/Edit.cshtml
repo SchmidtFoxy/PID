@@ -14,6 +14,18 @@
                 <input type="hidden" asp-for="Id" />
 
                 <div class="mb-3">
+                    <label asp-for="Titulo" class="form-label"></label>
+                    <input asp-for="Titulo" class="form-control" />
+                    <span asp-validation-for="Titulo" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Descricao" class="form-label"></label>
+                    <textarea asp-for="Descricao" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Descricao" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
                     <label asp-for="Ano" class="form-label"></label>
                     <input asp-for="Ano" class="form-control" />
                     <span asp-validation-for="Ano" class="text-danger"></span>
@@ -43,7 +55,6 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
-
 
 <style>
     .card:hover {

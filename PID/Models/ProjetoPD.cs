@@ -9,6 +9,11 @@ namespace PID.Models
         [Key]
         public int Id { get; set; }
 
+        [Required(ErrorMessage = "O campo Título é obrigatório.")]
+        public string Titulo { get; set; } = string.Empty;
+
+        public string? Descricao { get; set; }
+
         [Required]
         public int Ano { get; set; }
 

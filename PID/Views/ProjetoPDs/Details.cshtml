@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Detalhes do Projeto P&D";
+    var custoTotal = Model.Desenvolvimentos?.Sum(d => d.Custo) ?? 0;
 }
 
 <div class="container py-5">
@@ -12,30 +13,86 @@
         </div>
     </div>
 
-    <div class="card shadow-lg border-0 rounded-4">
+    <div class="card shadow-lg border-0 rounded-4 mb-4">
         <div class="card-body p-4">
+            <h4 class="fw-bold mb-3">Informações do Projeto</h4>
             <div class="row">
-                <div class="col-md-12">
-                    <p><strong>ID do Projeto:</strong> @Model.Id</p>
-                    <p><strong>@Html.DisplayNameFor(model => model.Ano):</strong> @Model.Ano</p>
-                    <p><strong>Desenvolvimentos:</strong></p>
-                    <ul>
-                        @foreach (var desenvolvimento in Model.Desenvolvimentos)
-                        {
-                            <li>@desenvolvimento.Classificacao - @desenvolvimento.Produto</li>
-                        }
-                    </ul>
-                    <p><strong>@Html.DisplayNameFor(model => model.Dispendio.Descricao):</strong> @Model.Dispendio.Descricao</p>
-                    <p><strong>@Html.DisplayNameFor(model => model.ProjetoFinep):</strong> @(Model.ProjetoFinep ? "✔️" : "❌")</p>
-                    <p><strong>@Html.DisplayNameFor(model => model.ProjetoLeiBem):</strong> @(Model.ProjetoLeiBem ? "✔️" : "❌")</p>
+                <div class="col-md-6">
+                    <p><strong>ID:</strong> @Model.Id</p>
+                    <p><strong>Título:</strong> @Model.Titulo</p>
+                    @if (!string.IsNullOrWhiteSpace(Model.Descricao))
+                    {
+                        <p><strong>Descrição:</strong> @Model.Descricao</p>
+                    }
+                    <p><strong>Ano:</strong> @Model.Ano</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Finep:</strong> @(Model.ProjetoFinep ? "✔️" : "❌")</p>
+                    <p><strong>Lei do Bem:</strong> @(Model.ProjetoLeiBem ? "✔️" : "❌")</p>
+                    <p><strong>Custo Total:</strong> <span class="badge bg-success fs-6">R$ @custoTotal.ToString("N2")</span></p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="text-center">
-        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary"><i class="fas fa-edit"></i> Editar</a>
-        <a asp-action="Index" class="btn btn-secondary ms-2"><i class="fas fa-arrow-left"></i> Voltar para Lista</a>
+    <div class="card shadow-lg border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+            <h4 class="fw-bold mb-3">Desenvolvimentos Vinculados</h4>
+            @if (Model.Desenvolvimentos != null && Model.Desenvolvimentos.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Produto</th>
+                                <th>Classificação</th>
+                                <th>Dificuldade</th>
+                                <th>Status</th>
+                                <th>Data Início</th>
+                                <th>Data Fim</th>
+                                <th>Custo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var dev in Model.Desenvolvimentos)
+                            {
+                                <tr>
+                                    <td>@dev.Produto</td>
+                                    <td>@dev.Classificacao</td>
+                                    <td>@dev.Dificuldade</td>
+                                    <td>@dev.Status</td>
+                                    <td>@dev.DataInicio.ToShortDateString()</td>
+                                    <td>@(dev.DataFim == DateTime.MinValue ? "Em andamento" : dev.DataFim.ToShortDateString())</td>
+                                    <td>R$ @dev.Custo.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">Nenhum desenvolvimento vinculado ao projeto.</p>
+            }
+
+            <div class="mt-4 d-flex flex-wrap gap-3">
+                <a asp-action="ExportarProjetoExcel" asp-route-id="@Model.Id" class="btn btn-outline-success">
+                    <i class="fas fa-file-excel me-2"></i> Exportar para Excel
+                </a>
+                <a asp-action="ExportarProjetoPdf" asp-route-id="@Model.Id" class="btn btn-outline-danger">
+                    <i class="fas fa-file-pdf me-2"></i> Exportar para PDF
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Editar
+        </a>
+        <a asp-action="Index" class="btn btn-secondary ms-2">
+            <i class="fas fa-arrow-left"></i> Voltar para Lista
+        </a>
     </div>
 </div>
 
@@ -47,5 +104,10 @@
 
     .card {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .table th {
+        background-color: #f8f9fa;
+        color: #6c757d;
     }
 </style>
