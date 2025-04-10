@@ -256,5 +256,33 @@ namespace PID.Controllers
 
             return View(desenvolvimentosFinep);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AdicionarComentario(int DesenvolvimentoId, string Texto)
+        {
+            if (string.IsNullOrWhiteSpace(Texto))
+                return RedirectToAction("Details", new { id = DesenvolvimentoId });
+
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null)
+                return Forbid(); // ou RedirectToAction("Login")
+
+            var comentario = new Comentario
+            {
+                DesenvolvimentoId = DesenvolvimentoId,
+                Texto = Texto,
+                UsuarioId = usuario.Id,
+                DataCriacao = DateTime.Now
+            };
+
+            _context.Comentarios.Add(comentario);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = DesenvolvimentoId });
+        }
+
+
+
     }
 }
