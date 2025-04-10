@@ -58,5 +58,9 @@ namespace PID.Models
         [ForeignKey("ProjetoPDId")]
         public ProjetoPD? ProjetoPD { get; set; }
 
+        // Adicionando os relacionamentos com Comentarios e HistoricoEdicoes
+        public ICollection<Comentario> Comentarios { get; set; }
+        public ICollection<HistoricoEdicaoDesenvolvimento> HistoricoEdicoes { get; set; }
+
     }
 }

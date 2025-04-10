@@ -17,6 +17,8 @@ namespace PID.Data
         public DbSet<Custo> Custos { get; set; }
         public DbSet<Tarefa> Tarefas { get; set; }
         public DbSet<Historico> Historicos { get; set; }
+        public DbSet<Comentario> Comentarios { get; set; }
+        public DbSet<HistoricoEdicaoDesenvolvimento> HistoricoEdicoes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,47 +29,75 @@ namespace PID.Data
                 .Property(c => c.Valor)
                 .HasColumnType("decimal(18,2)");
 
-            // Relacionamento um-para-muitos entre ProjetoPD e Desenvolvimento
+            // Relacionamento entre ProjetoPD e Desenvolvimento
             modelBuilder.Entity<ProjetoPD>()
                 .HasMany(p => p.Desenvolvimentos)
                 .WithOne(d => d.ProjetoPD)
                 .HasForeignKey(d => d.ProjetoPDId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Configuração de relacionamento entre ProjetoPD e Dispendio
+            // ProjetoPD -> Dispendio
             modelBuilder.Entity<ProjetoPD>()
                 .HasOne(p => p.Dispendio)
                 .WithMany()
                 .HasForeignKey(p => p.IdDispendio)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Configuração de relacionamento entre Custo e Dispendio
+            // Custo -> Dispendio
             modelBuilder.Entity<Custo>()
                 .HasOne(c => c.Dispendio)
                 .WithMany()
                 .HasForeignKey(c => c.IdDispendio)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Configuração de relacionamento entre Custo e Desenvolvimento
+            // Custo -> Desenvolvimento
             modelBuilder.Entity<Custo>()
                 .HasOne(c => c.Desenvolvimento)
                 .WithMany(d => d.Custos)
                 .HasForeignKey(c => c.IdDesenvolvimento)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Configuração de relacionamento entre Tarefa e Desenvolvimento
+            // Tarefa -> Desenvolvimento
             modelBuilder.Entity<Tarefa>()
                 .HasOne(t => t.Desenvolvimento)
                 .WithMany()
                 .HasForeignKey(t => t.IdDesenvolvimento)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Configuração de relacionamento entre Histórico e Desenvolvimento
+            // Histórico -> Desenvolvimento
             modelBuilder.Entity<Historico>()
                 .HasOne(h => h.Desenvolvimento)
                 .WithMany()
                 .HasForeignKey(h => h.IdDesenvolvimento)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Comentário -> Desenvolvimento
+            modelBuilder.Entity<Comentario>()
+                .HasOne(c => c.Desenvolvimento)
+                .WithMany(d => d.Comentarios)
+                .HasForeignKey(c => c.DesenvolvimentoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Comentário -> Usuario
+            modelBuilder.Entity<Comentario>()
+                .HasOne(c => c.Usuario)
+                .WithMany()
+                .HasForeignKey(c => c.UsuarioId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Histórico de Edição -> Desenvolvimento
+            modelBuilder.Entity<HistoricoEdicaoDesenvolvimento>()
+                .HasOne(h => h.Desenvolvimento)
+                .WithMany(d => d.HistoricoEdicoes)
+                .HasForeignKey(h => h.IdDesenvolvimento)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Histórico de Edição -> Usuario
+            modelBuilder.Entity<HistoricoEdicaoDesenvolvimento>()
+                .HasOne(h => h.Usuario)
+                .WithMany()
+                .HasForeignKey(h => h.UsuarioId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,13 +14,14 @@ namespace PID.Controllers
     public class DesenvolvimentoesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<Usuario> _userManager;
 
-        public DesenvolvimentoesController(ApplicationDbContext context)
+        public DesenvolvimentoesController(ApplicationDbContext context, UserManager<Usuario> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
-        // GET: Desenvolvimentoes
         public async Task<IActionResult> Index()
         {
             var desenvolvimentos = await _context.Desenvolvimentos
@@ -46,15 +48,16 @@ namespace PID.Controllers
             return View(desenvolvimentos);
         }
 
-        // GET: Desenvolvimentoes/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
                 return NotFound();
 
             var desenvolvimento = await _context.Desenvolvimentos
-                .Include(d => d.ProjetoPD) // Inclui o projeto vinculado
-                .Include(d => d.Custos) // Inclui os custos relacionados ao desenvolvimento
+                .Include(d => d.ProjetoPD)
+                .Include(d => d.Custos)
+                .Include(d => d.HistoricoEdicoes).ThenInclude(h => h.Usuario)
+                .Include(d => d.Comentarios).ThenInclude(c => c.Usuario)
                 .FirstOrDefaultAsync(m => m.IdDesenvolvimento == id);
 
             if (desenvolvimento == null)
@@ -63,8 +66,6 @@ namespace PID.Controllers
             return View(desenvolvimento);
         }
 
-
-        // GET: Desenvolvimentoes/Create
         public IActionResult Create()
         {
             ViewData["ProjetoPDId"] = new SelectList(_context.ProjetosPD.Select(p => new
@@ -76,10 +77,9 @@ namespace PID.Controllers
             return View();
         }
 
-        // POST: Desenvolvimentoes/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdDesenvolvimento,Classificacao,Dificuldade,Produto,Descricao,ERP,DataInicio,DataFim,ProjetoFinep,ProjetoLeiBem,Status,Solicitante,ProjetoPDId")] Desenvolvimento desenvolvimento)
+        public async Task<IActionResult> Create([Bind("IdDesenvolvimento,Classificacao,Dificuldade,Produto,Descricao,ERP,DataInicio,DataFim,ProjetoFinep,ProjetoLeiBem,Fase,Status,Solicitante,ProjetoPDId")] Desenvolvimento desenvolvimento)
         {
             if (ModelState.IsValid)
             {
@@ -98,7 +98,6 @@ namespace PID.Controllers
             return View(desenvolvimento);
         }
 
-        // GET: Desenvolvimentoes/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -119,10 +118,9 @@ namespace PID.Controllers
             return View(desenvolvimento);
         }
 
-        // POST: Desenvolvimentoes/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdDesenvolvimento,Classificacao,Dificuldade,Produto,Descricao,ERP,DataInicio,DataFim,ProjetoFinep,ProjetoLeiBem,Status,Solicitante,ProjetoPDId")] Desenvolvimento desenvolvimento)
+        public async Task<IActionResult> Edit(int id, [Bind("IdDesenvolvimento,Classificacao,Dificuldade,Produto,Descricao,ERP,DataInicio,DataFim,ProjetoFinep,ProjetoLeiBem,Fase,Status,Solicitante,ProjetoPDId")] Desenvolvimento desenvolvimento)
         {
             if (id != desenvolvimento.IdDesenvolvimento)
                 return NotFound();
@@ -131,8 +129,37 @@ namespace PID.Controllers
             {
                 try
                 {
+                    var original = await _context.Desenvolvimentos.AsNoTracking().FirstOrDefaultAsync(d => d.IdDesenvolvimento == id);
+                    if (original == null) return NotFound();
+
+                    var usuario = await _userManager.GetUserAsync(User);
+
+                    void AdicionarHistorico(string campo, string anterior, string atual)
+                    {
+                        if (anterior != atual)
+                        {
+                            _context.HistoricoEdicoes.Add(new HistoricoEdicaoDesenvolvimento
+                            {
+                                IdDesenvolvimento = id,
+                                CampoAlterado = campo,
+                                ValorAnterior = anterior,
+                                ValorAtual = atual,
+                                DataAlteracao = DateTime.Now,
+                                UsuarioId = usuario?.Id
+                            });
+                        }
+                    }
+
+                    AdicionarHistorico("Classificação", original.Classificacao, desenvolvimento.Classificacao);
+                    AdicionarHistorico("Produto", original.Produto, desenvolvimento.Produto);
+                    AdicionarHistorico("Descrição", original.Descricao, desenvolvimento.Descricao);
+                    AdicionarHistorico("ERP", original.ERP.ToString(), desenvolvimento.ERP.ToString());
+                    AdicionarHistorico("Status", original.Status, desenvolvimento.Status);
+                    AdicionarHistorico("Solicitante", original.Solicitante, desenvolvimento.Solicitante);
+
                     _context.Update(desenvolvimento);
                     await _context.SaveChangesAsync();
+
                     await AtualizarCustoTotal(desenvolvimento.IdDesenvolvimento);
                 }
                 catch (DbUpdateConcurrencyException)
@@ -167,14 +194,11 @@ namespace PID.Controllers
                 .FirstOrDefaultAsync(d => d.IdDesenvolvimento == idDesenvolvimento);
         }
 
-
-
-        // GET: Desenvolvimentoes/LeiBem
         public async Task<IActionResult> LeiBem()
         {
             var desenvolvimentosLeiBem = await _context.Desenvolvimentos
                 .Include(d => d.Custos)
-                .Where(d => d.ProjetoLeiBem) // Filtra apenas os registros com Lei do Bem = true
+                .Where(d => d.ProjetoLeiBem)
                 .Select(d => new Desenvolvimento
                 {
                     IdDesenvolvimento = d.IdDesenvolvimento,
@@ -186,7 +210,6 @@ namespace PID.Controllers
                     DataInicio = d.DataInicio,
                     DataFim = d.DataFim,
                     ProjetoFinep = d.ProjetoFinep,
-                    // Omitir a coluna Lei do Bem (não é necessário incluí-la na model)
                     Custo = d.Custos.Sum(c => c.Valor),
                     Fase = d.Fase,
                     Status = d.Status,
@@ -197,12 +220,11 @@ namespace PID.Controllers
             return View(desenvolvimentosLeiBem);
         }
 
-        // GET: Desenvolvimentoes/Finep
         public async Task<IActionResult> Finep()
         {
             var desenvolvimentosFinep = await _context.Desenvolvimentos
                 .Include(d => d.Custos)
-                .Where(d => d.ProjetoFinep) // Filtra apenas os registros com Finep = true
+                .Where(d => d.ProjetoFinep)
                 .Select(d => new Desenvolvimento
                 {
                     IdDesenvolvimento = d.IdDesenvolvimento,
@@ -214,7 +236,6 @@ namespace PID.Controllers
                     DataInicio = d.DataInicio,
                     DataFim = d.DataFim,
                     ProjetoLeiBem = d.ProjetoLeiBem,
-                    // Omitir a coluna Finep (não é necessário incluí-la na model)
                     Custo = d.Custos.Sum(c => c.Valor),
                     Fase = d.Fase,
                     Status = d.Status,
@@ -224,10 +245,5 @@ namespace PID.Controllers
 
             return View(desenvolvimentosFinep);
         }
-
-
-
-
-
     }
 }

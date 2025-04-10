@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PID.Data;
 
@@ -11,9 +12,11 @@ using PID.Data;
 namespace PID.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250407062113_AdicionarComentariosEHistorico")]
+    partial class AdicionarComentariosEHistorico
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -355,10 +358,10 @@ namespace PID.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("DataAlteracao")
+                    b.Property<DateTime>("DataEdicao")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("IdDesenvolvimento")
+                    b.Property<int>("DesenvolvimentoId")
                         .HasColumnType("int");
 
                     b.Property<string>("UsuarioId")
@@ -369,13 +372,13 @@ namespace PID.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ValorAtual")
+                    b.Property<string>("ValorNovo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IdDesenvolvimento");
+                    b.HasIndex("DesenvolvimentoId");
 
                     b.HasIndex("UsuarioId");
 
@@ -656,7 +659,7 @@ namespace PID.Migrations
                 {
                     b.HasOne("PID.Models.Desenvolvimento", "Desenvolvimento")
                         .WithMany("HistoricoEdicoes")
-                        .HasForeignKey("IdDesenvolvimento")
+                        .HasForeignKey("DesenvolvimentoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

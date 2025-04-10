@@ -10,7 +10,8 @@
 
     <div class="card shadow-lg border-0 rounded-4">
         <div class="card-body p-4">
-            <form asp-action="Create">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <div class="mb-3">

@@ -22,7 +22,7 @@ namespace PID.Controllers
         // GET: Historicoes
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Historicos.Include(h => h.Desenvolvimento);
+            var applicationDbContext = _context.HistoricoEdicoes.Include(h => h.Desenvolvimento);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -34,16 +34,21 @@ namespace PID.Controllers
                 return NotFound();
             }
 
-            var historico = await _context.Historicos
-                .Include(h => h.Desenvolvimento)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (historico == null)
+            var desenvolvimento = await _context.Desenvolvimentos
+                .Include(d => d.HistoricoEdicoes)  // Carrega as edições
+                .ThenInclude(he => he.Usuario)    // Carrega o usuário que fez a alteração
+                .Include(d => d.Comentarios)      // Carrega os comentários
+                .ThenInclude(c => c.Usuario)      // Carrega o usuário que fez o comentário
+                .FirstOrDefaultAsync(m => m.IdDesenvolvimento == id);
+
+            if (desenvolvimento == null)
             {
                 return NotFound();
             }
 
-            return View(historico);
+            return View(desenvolvimento);
         }
+
 
         // GET: Historicoes/Create
         public IActionResult Create()
@@ -53,11 +58,9 @@ namespace PID.Controllers
         }
 
         // POST: Historicoes/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,IdDesenvolvimento,Categoria,Descricao,Data,Responsavel")] Historico historico)
+        public async Task<IActionResult> Create([Bind("Id,IdDesenvolvimento,CampoAlterado,ValorAnterior,ValorAtual,DataAlteracao,UsuarioId")] HistoricoEdicaoDesenvolvimento historico)
         {
             if (ModelState.IsValid)
             {
@@ -77,7 +80,7 @@ namespace PID.Controllers
                 return NotFound();
             }
 
-            var historico = await _context.Historicos.FindAsync(id);
+            var historico = await _context.HistoricoEdicoes.FindAsync(id);
             if (historico == null)
             {
                 return NotFound();
@@ -87,11 +90,9 @@ namespace PID.Controllers
         }
 
         // POST: Historicoes/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,IdDesenvolvimento,Categoria,Descricao,Data,Responsavel")] Historico historico)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,IdDesenvolvimento,CampoAlterado,ValorAnterior,ValorAtual,DataAlteracao,UsuarioId")] HistoricoEdicaoDesenvolvimento historico)
         {
             if (id != historico.Id)
             {
@@ -107,7 +108,7 @@ namespace PID.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!HistoricoExists(historico.Id))
+                    if (!HistoricoEdicaoDesenvolvimentoExists(historico.Id))
                     {
                         return NotFound();
                     }
@@ -130,7 +131,7 @@ namespace PID.Controllers
                 return NotFound();
             }
 
-            var historico = await _context.Historicos
+            var historico = await _context.HistoricoEdicoes
                 .Include(h => h.Desenvolvimento)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (historico == null)
@@ -146,19 +147,20 @@ namespace PID.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var historico = await _context.Historicos.FindAsync(id);
+            var historico = await _context.HistoricoEdicoes.FindAsync(id);
             if (historico != null)
             {
-                _context.Historicos.Remove(historico);
+                _context.HistoricoEdicoes.Remove(historico);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool HistoricoExists(int id)
+        private bool HistoricoEdicaoDesenvolvimentoExists(int id)
         {
-            return _context.Historicos.Any(e => e.Id == id);
+            return _context.HistoricoEdicoes.Any(e => e.Id == id);
         }
     }
+
 }
